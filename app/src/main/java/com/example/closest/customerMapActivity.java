@@ -51,6 +51,7 @@ public class customerMapActivity extends FragmentActivity implements OnMapReadyC
         LocationListener {
 
     private GoogleMap mMap;
+    String name,phone,wasteType,quantity;
     private Button logout,request;
     private LatLng pickupLocation;
     GoogleApiClient mGoogleApiClient;
@@ -73,6 +74,12 @@ public class customerMapActivity extends FragmentActivity implements OnMapReadyC
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        name = getIntent().getExtras().getString("Name");
+        phone = getIntent().getExtras().getString("Phone");
+        wasteType = getIntent().getExtras().getString("Type");
+        quantity = getIntent().getExtras().getString("Quantity");
+
 
         logout = findViewById(R.id.btnLogout);
         request = findViewById(R.id.btnRequest);
@@ -101,6 +108,12 @@ public class customerMapActivity extends FragmentActivity implements OnMapReadyC
                     }
                 });
 
+                DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("CustomerRequests").child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                databaseReference.child("Name").setValue(name);
+                databaseReference.child("Phone").setValue(phone);
+                databaseReference.child("Type of waste").setValue(wasteType);
+                databaseReference.child("Quantity").setValue(quantity);
+
                 pickupLocation = new LatLng(lastLocation.getLatitude(),lastLocation.getLongitude());
                 mMap.addMarker(new MarkerOptions().position(pickupLocation).title("Pickup from here"));
                 request.setText("Getting information");
@@ -125,7 +138,8 @@ public class customerMapActivity extends FragmentActivity implements OnMapReadyC
     {
 
 
-        DatabaseReference driverLocation = FirebaseDatabase.getInstance().getReference().child("DriversAvailable");
+        DatabaseReference driverLocation = FirebaseDatabase.getInstance().getReference().child("DriversAvailable");// here we have to get reference of the
+                                                                                                                    // docking location of the vehicle
 
         GeoFire geoFire = new GeoFire(driverLocation);
         GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(pickupLocation.latitude, pickupLocation.longitude), radius);
